@@ -1,0 +1,358 @@
+{
+  "name": "gerenciador_banco_dados",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "acao"
+            },
+            {
+              "name": "telefoneCliente"
+            },
+            {
+              "name": "nomeCliente"
+            },
+            {
+              "name": "idConversa"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "id": "38f67e38-72c9-492f-ba00-ba4d5450c6ad",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.acao }}",
+                    "rightValue": "buscar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1ad97746-811e-47a4-9e95-234ef00d4deb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Get"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fb09ae4d-7039-4fde-94f0-424d17362578",
+                    "leftValue": "={{ $json.acao }}",
+                    "rightValue": "criar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Insert"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "11980a20-f105-40cd-b11f-6da91cd21289",
+                    "leftValue": "={{ $json.acao }}",
+                    "rightValue": "atualizar_conversa",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Update"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b745cf7c-44b5-47b4-908b-ff62212c0b8e",
+                    "leftValue": "={{ $json.acao }}",
+                    "rightValue": "falar_humano",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "humano"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [200, -20],
+      "id": "08a1a07b-0738-497d-8abd-0ea577e372eb",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Teste-IA",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefoneCliente",
+              "condition": "eq",
+              "keyValue": "={{ $json.telefoneCliente }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "IdConversa",
+              "fieldValue": "={{ $json.idConversa }}\n"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "falarComHumano",
+              "fieldValue": "false"
+            }
+          ]
+        }
+      },
+      "id": "4898a7df-0ec6-4cd6-b065-a7d0d01080fb",
+      "name": "Att cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [460, 120]
+    },
+    {
+      "parameters": {
+        "tableId": "Teste-IA",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $json.nomeCliente }}"
+            },
+            {
+              "fieldId": "telefoneCliente",
+              "fieldValue": "={{ $json.telefoneCliente }}"
+            },
+            {
+              "fieldId": "IdConversa",
+              "fieldValue": "={{ $json.IdConversa }}"
+            },
+            {
+              "fieldId": "falarComHumano",
+              "fieldValue": "false"
+            }
+          ]
+        }
+      },
+      "id": "27775923-947b-488b-99ff-c44fdd342790",
+      "name": "Criar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [460, -40],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Teste-IA",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefoneCliente",
+              "keyValue": "={{ $json.telefoneCliente }}"
+            }
+          ]
+        }
+      },
+      "id": "1a5c0d99-b500-4c8a-bdb4-abe992426ea6",
+      "name": "Get Cliente1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [460, -200],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "68adb965-822b-4af5-85d2-d49600f7280e",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "={{ $json.error }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [660, -40],
+      "id": "db349497-8ace-4b73-b8ab-91e2348dc115",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [900, -120],
+      "id": "dee0bea4-01bb-4ca2-955b-b2e9b7502c66",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegamos os dados do cliente que vieram do banco\nconst cliente = $input.first().json;\n\n// Se o cliente for novo e não tiver data, seguimos em frente\nif (!cliente.updated_at) return [{ json: cliente }];\n\n// Calcula a diferença de tempo entre a última mensagem e agora\nconst ultimaMensagem = new Date(cliente.updated_at).getTime();\nconst agora = new Date().getTime();\nconst horasPassadas = (agora - ultimaMensagem) / (1000 * 60 * 60);\n\nconst limiteHoras = 12;\n\nif (horasPassadas > limiteHoras) {\n    // Se passou do limite, apagamos o ID da conversa apenas nesta execução\n    cliente.IdConversa = \"\"; \n}\n\nreturn [{ json: cliente }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, -200],
+      "id": "87fa94c5-f416-4a34-8cf8-6388a3fa426e",
+      "name": "verifica_inatividade"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get Cliente1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Att cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cliente1": {
+      "main": [
+        [
+          {
+            "node": "verifica_inatividade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Att cliente": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
