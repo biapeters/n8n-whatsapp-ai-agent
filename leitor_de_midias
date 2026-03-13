@@ -1,0 +1,259 @@
+{
+  "name": "leitor_de_midias",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "87549d23-966c-499a-8044-a24599086bd8",
+                    "leftValue": "={{ $('When Executed by Another Workflow').item.json.body.data.message.audioMessage }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio?"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "85ef2887-2db1-4887-a40f-af8cc9c527b1",
+                    "leftValue": "={{ $('When Executed by Another Workflow').item.json.body.data.message.documentMessage }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "documento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a57ba199-4803-49f4-9528-589e54875d9f",
+                    "leftValue": "={{ $('When Executed by Another Workflow').first().json.body.data.message.imageMessage }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "imagem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "680466b6-1f04-4bdb-81bb-bcd71ced81c6",
+                    "leftValue": "={{ $('Campos Iniciais').item.json.mensagem }}",
+                    "rightValue": "=null",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "undefined"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-300, 360],
+      "id": "7115312a-fb08-4c72-9245-19def3503a03",
+      "name": "Switch3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sua-api.com/chat/getBase64FromMediaMessage/{{ $('When Executed by Another Workflow').item.json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SEU_API_KEY_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": {{ JSON.stringify($('Webhook').item.json.body.data) }}\n}",
+        "options": {}
+      },
+      "id": "2a1b0551-4c1f-4b92-a196-30cb9ae9612a",
+      "name": "Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base64Data = $input.first().json.base64; \n\n// Puxa os dados originais lá do começo para não perdermos o telefone do cliente\nconst dadosIniciais = $('Campos Iniciais').first().json;\n\nreturn [{\n    json: dadosIniciais, // Mantém os dados do cliente\n    binary: {\n        file: { // Cria o arquivo de áudio\n            data: base64Data,\n            mimeType: 'audio/ogg',\n            fileName: 'audio.ogg'\n        }\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [180, 0],
+      "id": "f55ba265-b3d9-463a-ba43-897498aa8281",
+      "name": "Audio1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer SEU_TOKEN_GROQ_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-large-v3"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [360, 0],
+      "id": "154ae1a6-51d5-4da7-8c27-7b57e0d3e730",
+      "name": "Audio-text",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "18947e40-5800-4515-befb-b83bf67b52fa",
+              "name": "mensagem",
+              "value": "={{ $json.text || \"[Aviso de Sistema]: O cliente enviou um áudio, mas o sistema não conseguiu transcrever. Peça gentilmente para ele digitar a mensagem em texto.\" }}",
+              "type": "string"
+            },
+            {
+              "id": "1514cef1-76f8-4d96-a237-20bf611856f9",
+              "name": "telefoneCliente",
+              "value": "={{ $('Campos Iniciais').item.json.telefoneCliente }}",
+              "type": "string"
+            },
+            {
+              "id": "bc1a880b-b388-4736-b547-12a182b1aad2",
+              "name": "nomeCliente",
+              "value": "={{ $('Campos Iniciais').item.json.nomeCliente }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [520, 0],
+      "id": "8613cc5c-d468-42e0-851e-cb0b31b2680b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sua-api.com/chat/getBase64FromMediaMessage/{{ $('When Executed by Another Workflow').item.json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SEU_API_KEY_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": {{ JSON.stringify($('When Executed by Another Workflow').item.json.body.data) }}\n}",
+        "options": {}
+      },
+      "id": "a2ea4e1d-98a9-4ea6-ad7e-50a071dabebf",
+      "name": "Documento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base64Data = $input.first().json.base64; \nconst webhookData = $('When Executed by Another Workflow').first().json.body.data.message.documentMessage;\nconst dadosIniciais = $('Campos Iniciais').first().json;\n\n// Inteligência para garantir a extensão correta caso o WhatsApp não envie o nome do arquivo\nlet nomeArquivo = webhookData.fileName;\n\nif (!nomeArquivo) {\n    const tipo = webhookData.mimetype || '';\n    if (tipo.includes('pdf')) nomeArquivo = 'documento.pdf';\n    else if (tipo.includes('spreadsheetml') || tipo.includes('excel')) nomeArquivo = 'planilha.xlsx';\n    else if (tipo.includes('wordprocessingml') || tipo.includes('msword')) nomeArquivo = 'texto.docx';\n    else nomeArquivo = 'documento.pdf'; // Fallback final de segurança\n}\n\nreturn [{\n    json: dadosIniciais, // Mantém os dados do cliente intactos\n    binary: {\n        file: { \n            data: base64Data,\n            mimeType: webhookData.mimetype, // Puxa o formato original\n            fileName: nomeArquivo \n        }\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [180, 160],
+      "id": "88d5ca17-a6cc-4b04-a85b-f6b185e9d850",
+      "name": "Documento1"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
