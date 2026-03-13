@@ -1,0 +1,1293 @@
+{
+  "name": "IA-Evolution-Public",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ia-rh-webhook",
+        "options": {}
+      },
+      "id": "d8256d52-1d4a-4e25-ba94-36e4ee4a23e8",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-4360, 340],
+      "webhookId": "WEBHOOK_ID_AQUI",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc05cccc-970d-4f10-a664-770f7521d935",
+              "leftValue": "={{ $('mensagens mobile/web1').item.json.idDify }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "75d67014-588c-4dc5-bab5-f37fba88a9c0",
+      "name": "If4",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-940, 340]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5d8b5b1b-a4cb-436c-82d9-6d074b494b53",
+              "name": "resposta",
+              "value": "={{ $('motor_inteligencia_dify').item.json.response }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "12d69f39-9f47-4837-94a9-bdd7f4e73607",
+      "name": "Resposta Ia1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-540, 340]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "934f547d-ee03-43e6-ba69-f58ad79749e8",
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "O node 'Get cliente' NÃO CONTÉM NADA",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fe111503-29d3-498d-87ed-c5d4711a196b",
+      "name": "If5",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-3240, 340]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst dadosProcessados = $('leitor_de_midias').first().json;\nif (items.length === 0 || Object.keys(items[0].json).length === 0) {\n    return [{\n        json: {\n            message: \"O node 'Get cliente' NÃO CONTÉM NADA\",\n            telefoneCliente: dadosProcessados.telefoneCliente,\n            nomeCliente: dadosProcessados.nomeCliente,\n            mensagemOriginal: dadosProcessados.mensagem, \n            idMensagem: dadosProcessados.idMensagem,\n            IdConversa: \"\" \n        }\n    }];\n} else {\n    return [{\n        json: {\n            message: \"O node 'Get cliente' contém dados\",\n            cliente: items[0].json,\n            telefoneCliente: dadosProcessados.telefoneCliente,\n            nomeCliente: dadosProcessados.nomeCliente,\n            mensagemOriginal: dadosProcessados.mensagem, \n            idMensagem: dadosProcessados.idMensagem,\n            IdConversa: items[0].json.IdConversa || \"\" \n        }\n    }];\n}"
+      },
+      "id": "f14ef7e4-eead-4ae7-bff6-8d1c2b74de52",
+      "name": "Verifica se Existe algo1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-3420, 340]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96246fe8-1863-4f81-aaad-df59794b1509",
+              "name": "=messages",
+              "value": "={{ $json.propertyName.map(value => {\n    const parsed = JSON.parse(value);\n    return parsed?.message?.conversation || parsed?.message?.extendedTextMessage?.text;\n}).join(\" \") }}",
+              "type": "string"
+            },
+            {
+              "id": "f1be28f9-4db3-42f9-8b9e-5f76d070f1fa",
+              "name": "idDify",
+              "value": "={{ $('Verifica se Existe algo1').item.json.idMensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3da0780d-cc98-4efa-a903-191cd08d6edb",
+      "name": "mensagens mobile/web1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-2020, 340]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Teste-IA",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefoneCliente",
+              "condition": "eq",
+              "keyValue": "={{ $('Get cliente1').item.json.telefoneCliente }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "falarComHumano",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "IdConversa",
+              "fieldValue": "={{ $('Code3').item.json.out[0].conversation_id }}"
+            }
+          ]
+        }
+      },
+      "id": "96a930be-2f38-467e-af52-9e861dde1080",
+      "name": "Supabase7",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-1120, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "142f3cdb-1b03-47f5-adfc-0ff4cd20f330",
+              "leftValue": "={{ $('mensagens mobile/web1').item.json.messages }}",
+              "rightValue": "esse processo sera tratado no 2 semestre de 2026",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "afaf0730-f787-4419-bcfe-871fb233a6a8",
+      "name": "mensagem falar com humano?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-1620, 340]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Teste-IA",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "IdConversa",
+              "keyValue": "={{ $('Code3').item.json.conversationID }}"
+            }
+          ]
+        }
+      },
+      "id": "5fe8d6d7-12d3-4aef-a3d5-e7acbd9e5ca5",
+      "name": "Supabase8",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-1280, 60],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Teste-IA",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "IdConversa",
+              "condition": "eq",
+              "keyValue": "={{ $('Code3').item.json.conversationID }}"
+            }
+          ]
+        }
+      },
+      "id": "f82b7389-3648-4312-b01c-70f1d74e5d7e",
+      "name": "Supabase9",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [20, 80],
+      "executeOnce": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a969fba7-126d-4554-9759-b54c9957125b",
+              "leftValue": "={{ $json.mensagemConsultor }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef095f14-2a52-407d-9e63-6c42c2db4bc0",
+      "name": "não mandou mensagem para o consultor?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-520, 40]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "26fa92ed-b027-42d1-8723-862d6c94b34e",
+              "leftValue": "={{ $('Verifica se Existe algo1').first().json.cliente?.falarComHumano }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "623681b2-6ba1-4664-8926-a5b4587f9874",
+      "name": "FalarComHumano?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-1180, 340],
+      "executeOnce": false,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Teste-IA",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "IdConversa",
+              "keyValue": "={{ $('Code3').item.json.conversationID }}"
+            }
+          ]
+        }
+      },
+      "id": "d780d617-d92b-418f-88ef-a976068a482d",
+      "name": "Supabase10",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [200, 80],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b04efaaf-e504-44ce-afe2-f72c89f201c7",
+              "leftValue": "={{ $('Supabase7').item.json.falarComHumano }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "2e0a4cbd-e854-427f-be2a-ae08fc077c36",
+      "name": "FalarComHumano?3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-900, 60],
+      "executeOnce": false,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "=fila_v0_{{ $json.telefoneCliente }}",
+        "options": {}
+      },
+      "id": "132a4f04-9ce3-4c1e-8fa5-68804a7ba281",
+      "name": "Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-2700, 340]
+    },
+    {
+      "parameters": {},
+      "id": "6ae8107b-c6e7-48c4-ab19-a9ffb8254dc2",
+      "name": "No Operation, do nothing5",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-2380, 180]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=fila_v0_{{ $('Verifica se Existe algo1').item.json.telefoneCliente }}"
+      },
+      "id": "a32e1b82-180f-46bc-9e78-53ff63d45a14",
+      "name": "Redis6",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-2220, 340]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ 'fila_v0_' + $('Verifica se Existe algo1').first().json.telefoneCliente }}",
+        "messageData": "={{ JSON.stringify({ key: { id: $('Verifica se Existe algo1').first().json.idMensagem }, messageTimestamp: $('Webhook').first().json.body.data.messageTimestamp, message: { conversation: $('Verifica se Existe algo1').first().json.mensagemOriginal } }) }}",
+        "tail": true
+      },
+      "id": "22add2ec-43dd-46f7-81dc-a16e9b5b8434",
+      "name": "Redis7",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-2880, 340]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.parse($json.propertyName[0]).key.id }}",
+                    "rightValue": "={{ $('Verifica se Existe algo1').first().json.idMensagem }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    },
+                    "id": "a7ce57fd-e8fc-4747-be1f-42d97513b042"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "nada a fazer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3d908709-afb5-40e2-af40-fd45520633f7",
+                    "leftValue": "={{ DateTime.fromSeconds(JSON.parse($json.propertyName[0]).messageTimestamp).setZone('America/Sao_Paulo').toISO() }}",
+                    "rightValue": "={{ $now.setZone('America/Sao_Paulo').minus(10, 'seconds').toISO() }}\n\n",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "beforeOrEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "prosseguir"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "esperar"
+        }
+      },
+      "id": "06746978-72c0-4d77-8d99-74a01b3401b9",
+      "name": "Switch2",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-2500, 340]
+    },
+    {
+      "parameters": {},
+      "id": "25bdfb32-af40-4c89-a863-72d6f83946e6",
+      "name": "No Operation, do nothing6",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-380, -100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sua-api.com/message/sendText/Sua-Instancia",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SEU_API_KEY_AQUI"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Verifica se Existe algo1').first().json.telefoneCliente }}\",\n  \"text\": \"{{ $json.resposta.replace(/\\r\\n|\\r|\\n/g, '\\\\n').replace(/\\\"/g, \"'\") }}\"\n}",
+        "options": {}
+      },
+      "id": "062e6c72-b4c8-4bea-ae35-fe08f40778c6",
+      "name": "HTTP Request7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-180, 340]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json;\nfunction replaceNewLines(obj) {\n    if (typeof obj === 'string') {\n        return obj.replace(/\\r\\n|\\r|\\n/g, '\\\\n');\n    }\n    if (Array.isArray(obj)) {\n        return obj.map(replaceNewLines);\n    }\n    if (typeof obj === 'object' && obj !== null) {\n        return Object.keys(obj).reduce((acc, key) => {\n            acc[key] = replaceNewLines(obj[key]);\n            return acc;\n        }, {});\n    }\n    return obj;\n}\nconst processedInput = replaceNewLines(input);\nreturn {\n    json: processedInput\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-360, 340],
+      "id": "4dd3e0a6-11e9-4ead-8cd2-1cf34f007746",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sua-api.com/message/sendText/Sua-Instancia",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SEU_API_KEY_AQUI"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"number\": \"{{ $('Campos Iniciais').item.json.telefoneCliente }}\",\n    \"textMessage\": {\n        \"text\": \"{{ $('Code3').item.json.response.replace(/\\r\\n|\\r|\\n/g, '\\\\n') }}\"\n    }\n}\n",
+        "options": {}
+      },
+      "id": "ac049e23-9954-4f32-b30d-3f80a5018e0f",
+      "name": "Fala pro Cliente que vai transferir pro Humano",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-340, 80]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sua-api.com/message/sendText/Sua-Instancia",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SEU_API_KEY_AQUI"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"number\": \"{{ $('Campos Iniciais').item.json.telefoneEmpresa }}\",\n    \"textMessage\": {\n        \"text\": \"{{ \\\"mandar mensagem para: \\\" + \\\"wa.me//\\\" + $json.remotejid.replace(/[^0-9]/g, '') }}\"\n    }\n}\n",
+        "options": {}
+      },
+      "id": "84de66a6-9b9b-409e-9692-c09eb9814f1a",
+      "name": "Avisa ao Consultor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 80],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [-2380, 480],
+      "id": "783d8371-5333-4d92-9935-ed17327a96f2",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ID_WORKFLOW_LEITOR",
+          "mode": "list",
+          "cachedResultName": "leitor_de_midias"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": ["body"],
+          "schema": [
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [-4200, 340],
+      "id": "28e62df2-fb1a-4cfa-9d19-37942295b50c",
+      "name": "leitor_de_midias"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ID_WORKFLOW_DB",
+          "mode": "list",
+          "cachedResultName": "gerenciador_banco_dados"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "acao": "buscar",
+            "telefoneCliente": "={{ $json.telefoneCliente }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "acao",
+              "displayName": "acao",
+              "type": "string"
+            },
+            {
+              "id": "telefoneCliente",
+              "displayName": "telefoneCliente",
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [-3620, 340],
+      "id": "5a795291-784b-482e-8491-d0e257991dd3",
+      "name": "gerenciador_banco_dados_get"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ID_WORKFLOW_DB",
+          "mode": "list",
+          "cachedResultName": "gerenciador_banco_dados"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "acao": "criar",
+            "telefoneCliente": "={{ $json.telefoneCliente }}",
+            "nomeCliente": "={{ $json.nomeCliente }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "acao",
+              "displayName": "acao",
+              "type": "string"
+            },
+            {
+              "id": "telefoneCliente",
+              "displayName": "telefoneCliente",
+              "type": "string"
+            },
+            {
+              "id": "nomeCliente",
+              "displayName": "nomeCliente",
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [-3060, 340],
+      "id": "014756c9-74eb-49c8-9818-94b94b91a8e4",
+      "name": "gerenciador_banco_dados_criar"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ID_WORKFLOW_DIFY",
+          "mode": "list",
+          "cachedResultName": "motor_inteligencia_dify"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mensagemOriginal": "={{ $('Verifica se Existe algo1').item.json.mensagemOriginal }}",
+            "telefoneCliente": "={{ $('Verifica se Existe algo1').item.json.telefoneCliente }}",
+            "apiKeyDify": "Bearer SEU_TOKEN_DIFY",
+            "IdConversa": "={{ $('Verifica se Existe algo1').item.json.IdConversa }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mensagemOriginal",
+              "displayName": "mensagemOriginal",
+              "type": "string"
+            },
+            {
+              "id": "telefoneCliente",
+              "displayName": "telefoneCliente",
+              "type": "string"
+            },
+            {
+              "id": "IdConversa",
+              "displayName": "IdConversa",
+              "type": "string"
+            },
+            {
+              "id": "apiKeyDify",
+              "displayName": "apiKeyDify",
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [-1820, 340],
+      "id": "d0174164-b496-431b-9952-d2210d4e863f",
+      "name": "motor_inteligencia_dify"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ID_WORKFLOW_DB",
+          "mode": "list",
+          "cachedResultName": "gerenciador_banco_dados"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "acao": "atualizar_conversa",
+            "telefoneCliente": "={{ $('Verifica se Existe algo1').first().json.telefoneCliente }}",
+            "idConversa": "={{ $('motor_inteligencia_dify').item.json.conversationID || null }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "acao",
+              "displayName": "acao",
+              "type": "string"
+            },
+            {
+              "id": "telefoneCliente",
+              "displayName": "telefoneCliente",
+              "type": "string"
+            },
+            {
+              "id": "idConversa",
+              "displayName": "idConversa",
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [-740, 340],
+      "id": "e0a19630-0e2e-4e73-8447-8b152f98da42",
+      "name": "gerenciador_banco_dados1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst valorSubstituicao = \"Vazio\"; \nif (items.length === 0 || Object.keys(items[0].json).length === 0) {\n    return [{\n        json: {\n            telefoneCliente: valorSubstituicao\n        }\n    }];\n} else {\n    return items.map(item => {\n        const novoItem = { json: {} };\n        novoItem.json.telefoneCliente = item.json.telefoneCliente === undefined || item.json.telefoneCliente === null\n            ? valorSubstituicao\n            : item.json.telefoneCliente;\n        return novoItem;\n    });\n}\n"
+      },
+      "id": "9c9f9277-4e20-4fdc-aa8e-94d8efe49eaa",
+      "name": "Valida Telefone Cliente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-4040, 340]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1d3aa747-dde3-4e98-a969-2a51c9ed5788",
+              "leftValue": "={{ $json.telefoneCliente }}",
+              "rightValue": "Vazio",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-3860, 340],
+      "id": "9538209d-c3ee-41a8-91f3-ce651604acc2",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-3740, 520],
+      "id": "dd0422f2-7332-4a5b-a59d-4d4f79ea8c6f",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ID_WORKFLOW_DB",
+          "mode": "list",
+          "cachedResultName": "gerenciador_banco_dados"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "acao": "atualizar_conversa",
+            "telefoneCliente": "={{ $('If5').item.json.cliente.telefoneCliente }}",
+            "idConversa": "={{ $json.out && $json.out[0]?.conversation_id || null }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "acao",
+              "displayName": "acao",
+              "type": "string"
+            },
+            {
+              "id": "telefoneCliente",
+              "displayName": "telefoneCliente",
+              "type": "string"
+            },
+            {
+              "id": "idConversa",
+              "displayName": "idConversa",
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [-1380, 340],
+      "id": "137ff250-03c5-4169-ae6a-c7b1fbfde264",
+      "name": "gerenciador_banco_dados_att"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "leitor_de_midias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "gerenciador_banco_dados1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta Ia1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta Ia1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "gerenciador_banco_dados_criar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica se Existe algo1": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mensagens mobile/web1": {
+      "main": [
+        [
+          {
+            "node": "motor_inteligencia_dify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase7": {
+      "main": [
+        [
+          {
+            "node": "FalarComHumano?3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mensagem falar com humano?1": {
+      "main": [
+        [
+          {
+            "node": "Supabase8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "gerenciador_banco_dados_att",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase8": {
+      "main": [
+        [
+          {
+            "node": "Supabase7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase9": {
+      "main": [
+        [
+          {
+            "node": "Supabase10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "não mandou mensagem para o consultor?1": {
+      "main": [
+        [
+          {
+            "node": "Fala pro Cliente que vai transferir pro Humano",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FalarComHumano?2": {
+      "main": [
+        [
+          {
+            "node": "não mandou mensagem para o consultor?1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase10": {
+      "main": [
+        [
+          {
+            "node": "não mandou mensagem para o consultor?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FalarComHumano?3": {
+      "main": [
+        [
+          {
+            "node": "não mandou mensagem para o consultor?1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis6": {
+      "main": [
+        [
+          {
+            "node": "mensagens mobile/web1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis7": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fala pro Cliente que vai transferir pro Humano": {
+      "main": [
+        [
+          {
+            "node": "Avisa ao Consultor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisa ao Consultor": {
+      "main": [
+        [
+          {
+            "node": "Supabase9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "leitor_de_midias": {
+      "main": [
+        [
+          {
+            "node": "Valida Telefone Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gerenciador_banco_dados_get": {
+      "main": [
+        [
+          {
+            "node": "Verifica se Existe algo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gerenciador_banco_dados_criar": {
+      "main": [
+        [
+          {
+            "node": "Redis7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "motor_inteligencia_dify": {
+      "main": [
+        [
+          {
+            "node": "mensagem falar com humano?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gerenciador_banco_dados1": {
+      "main": [
+        [
+          {
+            "node": "Resposta Ia1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valida Telefone Cliente": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "gerenciador_banco_dados_get",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gerenciador_banco_dados_att": {
+      "main": [
+        [
+          {
+            "node": "FalarComHumano?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
