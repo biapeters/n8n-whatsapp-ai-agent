@@ -1,0 +1,98 @@
+{
+  "name": "motor_inteligencia_dify",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "mensagemOriginal"
+            },
+            {
+              "name": "telefoneCliente"
+            },
+            {
+              "name": "IdConversa"
+            },
+            {
+              "name": "apiKeyDify"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-220, 0],
+      "id": "b8bb1235-1c1c-49ed-95b5-7a9b085905df",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dify.ai/v1/chat-messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.apiKeyDify }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=user",
+              "value": "={{ $json.telefoneCliente }}"
+            },
+            {
+              "name": "query",
+              "value": "={{ $json.mensagemOriginal }}"
+            },
+            {
+              "name": "response_mode",
+              "value": "streaming"
+            },
+            {
+              "name": "conversation_id",
+              "value": "={{ ($json.IdConversa || '').replace(/\\r\\n|\\r|\\n/g, '') }}"
+            },
+            {
+              "name": "inputs",
+              "value": "={{ { } }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d17dd7ab-50ce-4c85-bf3f-24d590d96ea7",
+      "name": "Dify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-20, 0],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.all();\nconst data_string = JSON.stringify(data);\nconst data_json = JSON.parse(data_string);\nconst data_json_text = data_json[0]?.json?.data;\nconst data_array = data_json_text?.split('\\n');\n\nconst out = [];\nlet conversationID = \"\";\n\nfor (const item of data_array) {\n  const t = item.replace('data:', '');\n  try {\n    const t_json = JSON.parse(t);\n    console.log(t_json);\n    if (t_json.event === 'agent_thought') {\n      out.push(t_json);\n      conversationID = t_json?.conversation_id;\n    }\n  } catch {\n    // Ignora erros de parsing\n  }\n}\n\n// Junta todas as mensagens e remove apenas o \\n inicial\nconst msg = out\n  .map((item) => item.thought)\n  .join('\\n')\n  .replace(/^\\n/, ''); // Remove apenas o primeiro \\n, se existir\n\nconsole.log(msg);\n\nreturn { response: msg, conversationID, out };\n"
+      },
+      "id": "8aa46a81-88cc-435b-bfc1-f33da3cee7dd",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [180, 0]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Dify",
+            "
